@@ -1,6 +1,7 @@
 package com.hellozjf.test.testspringmvc.util;
 
 
+import com.hellozjf.test.testspringmvc.constant.ResultEnum;
 import com.hellozjf.test.testspringmvc.vo.ResultVO;
 
 /**
@@ -26,5 +27,9 @@ public class ResultUtils {
         result.setCode(code);
         result.setMsg(msg);
         return result;
+    }
+
+    public static ResultVO error(ResultEnum resultEnum) {
+        return error(resultEnum.getCode(), resultEnum.getMessage());
     }
 }

@@ -14,7 +14,9 @@ import javax.persistence.Lob;
 public class User extends BaseEntity {
     private String username;
     private String password;
+    private String email;
     private Integer age;
+    private String pictureName;
     @Lob
     @Column(length = 1 * 1024 * 1024)
     private byte[] picture;

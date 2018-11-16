@@ -6,18 +6,18 @@ import com.hellozjf.test.testspringmvc.dataobject.User;
 import com.hellozjf.test.testspringmvc.exception.SpringMVCException;
 import com.hellozjf.test.testspringmvc.form.UserForm;
 import com.hellozjf.test.testspringmvc.repository.UserRepository;
+import com.hellozjf.test.testspringmvc.util.PartUtils;
 import com.hellozjf.test.testspringmvc.util.ResultUtils;
 import com.hellozjf.test.testspringmvc.vo.ResultVO;
 import com.hellozjf.test.testspringmvc.vo.UserVO;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.Part;
-import java.io.InputStream;
+import javax.validation.Valid;
 import java.util.List;
 
 /**
@@ -50,40 +50,55 @@ public class UserController {
     }
 
     @PostMapping("/")
-    public ResultVO post(UserForm userForm) {
+    public ResultVO post(@Valid UserForm userForm,
+                         @RequestPart(name = "picture", required = false) Part picture,
+                         Errors errors) {
+
+        if (errors.hasErrors()) {
+            log.error("表单验证错误 {}", errors.getAllErrors());
+            return ResultUtils.error(ResultEnum.FORM_VALIDATE_ERROR);
+        }
+
         User user = new User();
         BeanUtils.copyProperties(userForm, user);
+        if (picture != null) {
+            user.setPicture(PartUtils.getPartByteArray(picture));
+            user.setPictureName(picture.getSubmittedFileName());
+        }
         user = userRepository.save(user);
         UserVO userVO = UserVO.getByUser(user);
         return ResultUtils.success(userVO);
     }
 
     @PostMapping("/json")
-    public ResultVO postJson(@RequestBody UserForm userForm) {
-        return post(userForm);
+    public ResultVO postJson(@Valid @RequestBody UserForm userForm,
+                             Errors errors) {
+
+        if (errors.hasErrors()) {
+            log.error("表单验证错误 {}", errors.getAllErrors());
+            return ResultUtils.error(ResultEnum.FORM_VALIDATE_ERROR);
+        }
+
+        return post(userForm, null, errors);
     }
 
     @PutMapping("/{id}")
     public ResultVO put(@PathVariable("id") String id,
-                        @RequestPart("picture") Part part,
-                        UserForm userForm) {
+                        @RequestPart(name = "picture", required = false) Part picture,
+                        @Valid UserForm userForm,
+                        Errors errors) {
+
+        if (errors.hasErrors()) {
+            log.error("表单验证错误 {}", errors.getAllErrors());
+            return ResultUtils.error(ResultEnum.FORM_VALIDATE_ERROR);
+        }
+
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new SpringMVCException(ResultEnum.CAN_NOT_FIND_THIS_ID_OBJECT));
-
         BeanUtils.copyProperties(userForm, user);
-
-        try (InputStream in = part.getInputStream()) {
-            ByteBuf byteBuf = Unpooled.buffer();
-            log.debug("maxCapacity = {}", byteBuf.maxCapacity());
-            byte[] bytes = byteBuf.array();
-            int totalReadNum = 0;
-            int readNum = 0;
-            while ((readNum = in.read(bytes, totalReadNum, 1024)) > 0) {
-                totalReadNum += readNum;
-            }
-            user.setPicture(byteBuf.array());
-        } catch (Exception e) {
-            log.error("error = {}", e);
+        if (picture != null) {
+            user.setPicture(PartUtils.getPartByteArray(picture));
+            user.setPictureName(picture.getSubmittedFileName());
         }
 
         user = userRepository.save(user);

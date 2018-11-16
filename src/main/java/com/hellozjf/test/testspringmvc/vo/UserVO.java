@@ -5,6 +5,7 @@ import com.hellozjf.test.testspringmvc.dataobject.User;
 import lombok.Data;
 import org.springframework.beans.BeanUtils;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,7 +13,7 @@ import java.util.List;
  * @author hellozjf
  */
 @Data
-public class UserVO {
+public class UserVO implements Serializable {
     private String id;
     @JsonProperty("UserName")
     private String username;

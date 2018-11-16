@@ -12,4 +12,7 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties("custom")
 public class CustomConfig {
     private Integer maxPartSize;
+    private String restAddress;
+    private String ssoAddress;
+    private String redirectAddress;
 }

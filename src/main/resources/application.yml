@@ -1,26 +1,27 @@
 spring:
   datasource:
-    url: jdbc:h2:./db/test-springmvc
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
+    url: jdbc:mysql://aliyun.hellozjf.com:3306/test-springmvc?useUnicode=true&characterEncoding=UTF-8&useSSL=false
+    driver-class-name: com.mysql.jdbc.Driver
+    username: root
+    password: Zjf@1234
   jpa:
     show-sql: false
     hibernate:
       ddl-auto: update
-  h2:
-    console:
-      enabled: true
-      settings:
-        web-allow-others: true
+    # 不加下面这句则默认为myisam引擎
+    database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
 logging:
   level:
-    com.hellozjf.test.testspringmvc: debug
+    com.hellozjf: debug
+  file: ./output/output.log
 management:
   endpoints:
     web:
       exposure:
         include: "*"
 custom:
-  # ��󸽼�1M
+  # 最大附件1M
   max-part-size: 1
+  rest-address: http://localhost:8080
+  sso-address: http://aliyun.hellozjf.com:8081
+  redirect-address: http://xrnhxd.natappfree.cc
